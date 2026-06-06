@@ -24,7 +24,7 @@ namespace Banking_System.Controllers
         [HttpPost("deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositWithdrawDto request)
         {
-            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == request.AccountId);
+            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == request.AccountNumber);
             if (account == null) return NotFound(new { message = "Account Not Found." });
             if (!account.IsActive) return BadRequest(new { message = "This account is currently locked/closed." });
 
@@ -73,7 +73,7 @@ namespace Banking_System.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = Guid.Parse(userIdClaim!);
 
-            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == request.AccountId);
+            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == request.AccountNumber);
             if (account == null) return NotFound(new { message = "Account Not Found." });
             if (!account.IsActive) return BadRequest(new { message = "This account is currently locked/closed." });
 
@@ -117,37 +117,43 @@ namespace Banking_System.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Transfer([FromBody] TransferDto request)
         {
-            if (request.FromAccountId == request.ToAccountId)
-                return BadRequest(new { message = "Source and destination accounts cannot be the same." });
+            if (request.Amount <= 0)
+            {
+                return BadRequest(new { message = "The transfer amount must be greater than 0." });
+            }
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = Guid.Parse(userIdClaim!);
 
-            // Take info of two acccounts involved in the transfer
-            var sourceAcc = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == request.FromAccountId);
-            var destAcc = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == request.ToAccountId);
+            //Find current user's account as source account for transfer
+            var sourceAccount = await _context.BankAccounts.FirstOrDefaultAsync(a => a.UserId == userId);
 
-            if (sourceAcc == null) return NotFound(new { message = "Source Account Not Found." });
+            if (sourceAccount == null)
+                return NotFound(new { message = "You have not activated a bank account in the system." });
+
+            if (!sourceAccount.IsActive)
+                return BadRequest(new { message = "Your account is currently locked or inactive." });
+
+            //Find destination account based on the provided account number
+            var destAcc = await _context.BankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == request.ToAccountNumber);
+
             if (destAcc == null) return NotFound(new { message = "Destination Account Not Found." });
 
-            if (!sourceAcc.IsActive) return BadRequest(new { message = "Source account is locked." });
             if (!destAcc.IsActive) return BadRequest(new { message = "Destination account is locked." });
 
-            // Only account owner can transfer money from their account, even Admin cannot transfer from other account
-            if (sourceAcc.UserId != userId) return Forbid();
-            if (sourceAcc.Balance < request.Amount) return BadRequest(new { message = "Insufficient account balance to perform the transfer." });
+            if (sourceAccount.Balance < request.Amount) return BadRequest(new { message = "Insufficient account balance to perform the transfer." });
 
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                sourceAcc.Balance -= request.Amount;
+                sourceAccount.Balance -= request.Amount;
                 destAcc.Balance += request.Amount;
 
                 var log = new Models.Transaction
                 {
                     Id = Guid.NewGuid(),
-                    SourceAccountId = sourceAcc.Id,
+                    SourceAccountId = sourceAccount.Id,
                     DestinationAccountId = destAcc.Id,
                     Amount = request.Amount,
                     Type = TransactionType.Transfer,
@@ -156,14 +162,14 @@ namespace Banking_System.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                _context.BankAccounts.Update(sourceAcc);
+                _context.BankAccounts.Update(sourceAccount);
                 _context.BankAccounts.Update(destAcc);
                 _context.Transactions.Add(log);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return Ok(new { message = "Transfer successfully!", currentBalance = sourceAcc.Balance });
+                return Ok(new { message = "Transfer successfully!", currentBalance = sourceAccount.Balance });
             }
             catch (Exception)
             {

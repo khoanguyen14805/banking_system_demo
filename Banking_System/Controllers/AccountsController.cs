@@ -134,9 +134,9 @@ namespace Banking_System.Controllers
             });
         }
 
-        // 3.================== GET: /api/accounts/{id} (Lấy chi tiết 1 tài khoản)
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAccountById(Guid id)
+        // 3.================== GET: /api/accounts/{number} (Lấy chi tiết 1 tài khoản)
+        [HttpGet("{number}")]
+        public async Task<IActionResult> GetAccountByNumber(string number)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
@@ -144,7 +144,7 @@ namespace Banking_System.Controllers
 
             var account = await _context.BankAccounts
                 .Include(a => a.User)
-                .FirstOrDefaultAsync(a => a.Id == id);
+                .FirstOrDefaultAsync(a => a.AccountNumber == number);
 
             if (account == null) return NotFound(new { message = "Account Not Found." });
 
@@ -168,15 +168,15 @@ namespace Banking_System.Controllers
             return Ok(response);
         }
 
-        // 4.================== PUT: /api/accounts/{id}/close (Close or Lock Bank Account - SOFT DELETE)
-        [HttpPut("{id}/close")]
-        public async Task<IActionResult> CloseAccount(Guid id)
+        // 4.================== PUT: /api/accounts/{number}/close (Close or Lock Bank Account - SOFT DELETE)
+        [HttpPut("{number}/close")]
+        public async Task<IActionResult> CloseAccount(string number)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim)) return Unauthorized();
             var userId = Guid.Parse(userIdClaim);
 
-            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == id);
+            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == number);
             if (account == null) return NotFound(new { message = "Account Not Found." });
 
             // Only Admin or the account owner can close the account

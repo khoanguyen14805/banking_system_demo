@@ -59,8 +59,7 @@ namespace Banking_System.Tests.Controllers
 
             var transferDto = new TransferDto
             {
-                FromAccountId = sourceAccount.Id,
-                ToAccountId = destAccount.Id,
+                ToAccountNumber = destAccount.AccountNumber,
                 Amount = 200000,
                 Description = "Chuyển tiền học phí EIU"
             };
@@ -99,8 +98,7 @@ namespace Banking_System.Tests.Controllers
 
             var transferDto = new TransferDto
             {
-                FromAccountId = sourceAccount.Id,
-                ToAccountId = destAccount.Id,
+                ToAccountNumber = destAccount.AccountNumber,
                 Amount = 50000, // Đòi chuyển 50k
                 Description = "Thử chuyển quá số dư"
             };
@@ -137,8 +135,7 @@ namespace Banking_System.Tests.Controllers
 
             var transferDto = new TransferDto
             {
-                FromAccountId = sourceAccount.Id,
-                ToAccountId = Guid.NewGuid(), // ID tài khoản đích ngẫu nhiên, không hề tồn tại trong DB
+                ToAccountNumber = "999999", // Số tài khoản đích ngẫu nhiên, không hề tồn tại trong DB
                 Amount = 50000,
                 Description = "Chuyển tiền tới tài khoản ma"
             };
@@ -176,8 +173,7 @@ namespace Banking_System.Tests.Controllers
 
             var transferDto = new TransferDto
             {
-                FromAccountId = sourceAccount.Id,
-                ToAccountId = destAccount.Id,
+                ToAccountNumber = destAccount.AccountNumber,
                 Amount = 50000,
                 Description = "Tài khoản bị khóa cố chuyển tiền"
             };

@@ -28,7 +28,7 @@ namespace Banking_System.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = Guid.Parse(userIdClaim!);
 
-            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.Id == request.BankAccountId);
+            var account = await _context.BankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == request.AccountNumber);
             if (account == null) return NotFound(new { message = "Linked Account Not Found." });
 
             // The linked account must be owned by the person currently logged in and must be active

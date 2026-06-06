@@ -22,6 +22,7 @@ namespace Banking_System.Models.Context
         {
             base.OnModelCreating(modelBuilder);
 
+
             // Configure UserRole Primary key
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
@@ -78,6 +79,8 @@ namespace Banking_System.Models.Context
                 new Role { Id = 1, Name = "Admin" },
                 new Role { Id = 2, Name = "Customer" }
             );
+
+
         }
     }
 }
