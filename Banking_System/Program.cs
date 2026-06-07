@@ -1,6 +1,7 @@
 using Banking_System.Models.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -82,5 +83,19 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseStaticFiles();
+// 2. Lấy đường dẫn tuyệt đối dẫn tới thư mục UI
+string uiFolderPath = Path.Combine(builder.Environment.ContentRootPath, "UI");
 
+// ĐOẠN CODE PHÒNG THỦ: Nếu chưa có folder UI trên ổ đĩa, tự động tạo mới luôn!
+if (!Directory.Exists(uiFolderPath))
+{
+    Directory.CreateDirectory(uiFolderPath);
+}
+
+// 3. Bây giờ truyền vào PhysicalFileProvider một cách an toàn 100% không lo crash
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uiFolderPath),
+    RequestPath = ""
+});
 app.Run();

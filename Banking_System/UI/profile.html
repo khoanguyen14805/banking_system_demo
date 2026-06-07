@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIU Digital Banking - Hồ Sơ Cá Nhân</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <nav class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-xl tracking-tight">EIU BANKING</span>
+                <span class="text-xs bg-blue-700 px-2 py-1 rounded">Hồ sơ khách hàng</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/transfer.html" class="text-sm bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-xl font-medium transition-all">
+                    ⬅️ Quay lại Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <div class="md:col-span-1 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center relative overflow-hidden">
+                <div class="relative inline-block w-32 h-32 mx-auto mb-4 group">
+                    <img id="viewAvatar" src="https://placehold.co/150" alt="Avatar"
+                         class="w-full h-full object-cover rounded-full border-4 border-slate-100 shadow-md">
+                    <label for="avatarFile" class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all active:scale-95">
+                        📷
+                    </label>
+                </div>
+
+                <h2 id="viewFullName" class="text-xl font-bold text-slate-800">------</h2>
+                <p id="viewUsername" class="text-xs text-slate-400 font-mono mt-0.5">@username</p>
+
+                <div class="mt-6 pt-5 border-t border-slate-100 text-left space-y-3 text-xs text-slate-600">
+                    <div class="flex justify-between"><span>Email:</span><strong id="viewEmail" class="text-slate-800">--</strong></div>
+                    <div class="flex justify-between"><span>Số ĐT:</span><strong id="viewPhone" class="text-slate-800">--</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-8">
+
+            <div id="statusAlert" class="hidden p-4 rounded-xl text-sm border flex items-center gap-2">
+                <span id="statusMessage"></span>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                    👤 Cập nhật thông tin chi tiết
+                </h3>
+
+                <form id="profileForm" class="space-y-4">
+                    <div class="hidden">
+                        <input type="file" id="avatarFile" accept=".png, .jpg, .jpeg">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Số CCCD / Citizen ID</label>
+                            <input type="text" id="citizenId" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập số CCCD...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Ngày sinh</label>
+                            <input type="date" id="dateOfBirth" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Địa chỉ thường trú</label>
+                        <input type="text" id="address" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ví dụ: Số 1, Đường Hùng Vương, Bình Dương">
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="btnSaveProfile" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md transition-all active:scale-95">
+                            Lưu thông tin hồ sơ
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                    🔑 Đổi mật khẩu bảo mật
+                </h3>
+
+                <form id="changePasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu cũ</label>
+                        <input type="password" id="oldPassword" required class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="••••••••">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu mới</label>
+                            <input type="password" id="newPassword" required minlength="6" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Tối thiểu 6 ký tự">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Xác nhận mật khẩu mới</label>
+                            <input type="password" id="confirmNewPassword" required minlength="6" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập lại mật khẩu mới">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="btnSavePassword" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md transition-all active:scale-95">
+                            Thay đổi mật khẩu
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const token = sessionStorage.getItem('token');
+        if (!token) window.location.href = '/login.html';
+
+        // 1. TỰ ĐỘNG LOAD THÔNG TIN PROFILE KHI VÀO TRANG
+        async function fetchUserProfile() {
+            try {
+                const response = await fetch('/api/users/profile', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Điền thông tin vào cột Xem nhanh bên trái
+                    document.getElementById('viewFullName').innerText = data.fullName || "Chưa cập nhật";
+                    document.getElementById('viewUsername').innerText = `@${data.username}`;
+                    document.getElementById('viewEmail').innerText = data.email;
+                    document.getElementById('viewPhone').innerText = data.phoneNumber || "Chưa có";
+
+                    // Nếu Backend có trả về link Avatar, đổi src của thẻ img
+                    if (data.profile && data.profile.avatarUrl) {
+                        document.getElementById('viewAvatar').src = data.profile.avatarUrl + "?t=" + new Date().getTime();
+                     }
+
+                    // Điền dữ liệu sẵn vào các ô Form bên phải để người dùng chỉnh sửa
+                    if (data.profile) {
+                        document.getElementById('citizenId').value = data.profile.citizenId || "";
+                        document.getElementById('address').value = data.profile.address || "";
+
+                        // Định dạng lại chuỗi ngày tháng năm YYYY-MM-DD để nhét vào thẻ input type="date"
+                        if (data.profile.dateOfBirth) {
+                            const dob = new Date(data.profile.dateOfBirth).toISOString().split('T')[0];
+                            document.getElementById('dateOfBirth').value = dob;
+                        }
+                    }
+                }
+            } catch (error) { console.error("Lỗi lấy hồ sơ:", error); }
+        }
+
+        fetchUserProfile();
+
+        // Xử lý xem trước ảnh (Preview) ngay khi người dùng chọn file từ máy tính
+        document.getElementById('avatarFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('viewAvatar').src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. LOGIC GỬI MULTIPART/FORM-DATA CẬP NHẬT PROFILE
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveProfile');
+            btn.disabled = true;
+            btn.innerText = "Đang lưu...";
+
+            // 🌟 SỬ DỤNG FORMDATA ĐỂ GỬI ĐƯỢC FILE ẢNH LÊN ENDPOINT [FromForm]
+            const formData = new FormData();
+            formData.append('Address', document.getElementById('address').value.trim());
+            formData.append('CitizenId', document.getElementById('citizenId').value.trim());
+
+            const dobValue = document.getElementById('dateOfBirth').value;
+            if(dobValue) formData.append('DateOfBirth', dobValue);
+
+            const fileInput = document.getElementById('avatarFile');
+            if (fileInput.files.length > 0) {
+                formData.append('AvatarFile', fileInput.files[0]); // Đính kèm file ảnh vật lý thực tế
+            }
+
+            try {
+                const response = await fetch('/api/users/profile', {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }, // Tuyệt đối KHÔNG ghi Content-Type ở đây, trình duyệt sẽ tự gán multipart/form-data kèm Boundary
+                    body: formData
+                });
+
+                const resData = await response.json();
+                showAlert(resData.message || "Cập nhật hồ sơ thành công!", response.ok);
+
+                if (response.ok) {
+                    await fetchUserProfile(); // Tải lại để cập nhật toàn bộ ảnh đại diện mới
+                }
+            } catch (error) {
+                showAlert("Lỗi kết nối máy chủ cập nhật hồ sơ.", false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Lưu thông tin hồ sơ";
+            }
+        });
+
+        // 3. LOGIC GỬI FORM ĐỔI MẬT KHẨU [FromBody]
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const oldPass = document.getElementById('oldPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmNewPassword').value;
+
+            if (newPass !== confirmPass) {
+                showAlert("Mật khẩu mới và mật khẩu xác nhận không trùng khớp nhau!", false);
+                return;
+            }
+
+            const btn = document.getElementById('btnSavePassword');
+            btn.disabled = true;
+            btn.innerText = "Đang xử lý...";
+
+            try {
+                const response = await fetch('/api/users/change-password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        OldPassword: oldPass,
+                        NewPassword: newPass
+                    })
+                });
+
+                const resData = await response.json();
+                showAlert(resData.message || "Đổi mật khẩu thành công!", response.ok);
+
+                if (response.ok) {
+                    document.getElementById('changePasswordForm').reset();
+                }
+            } catch (error) {
+                showAlert("Lỗi kết nối máy chủ đổi mật khẩu.", false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Thay đổi mật khẩu";
+            }
+        });
+
+        // Hàm hiện hộp thông báo chung
+        function showAlert(message, isSuccess) {
+            const alertBox = document.getElementById('statusAlert');
+            const alertMsg = document.getElementById('statusMessage');
+            alertBox.className = "mb-6 p-4 rounded-xl text-sm flex items-center gap-2 border " +
+                (isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700");
+            alertMsg.innerText = message;
+            alertBox.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn mượt lên trên đầu để người dùng dễ nhìn thông báo
+        }
+    </script>
+</body>
+</html>

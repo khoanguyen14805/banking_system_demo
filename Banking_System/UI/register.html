@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIU Digital Banking - Đăng Ký</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Card Đăng ký: Tự động Responsive -->
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 text-white text-2xl font-bold mb-2 shadow-md shadow-blue-200">
+                E
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">TẠO TÀI KHOẢN MỚI</h1>
+            <p class="text-sm text-slate-500 mt-1">Bắt đầu trải nghiệm ngân hàng số EIU</p>
+        </div>
+
+        <!-- Hộp thông báo lỗi hoặc thành công -->
+        <div id="statusAlert" class="hidden mb-4 p-3 text-sm rounded-lg flex items-center gap-2 border">
+            <span id="statusMessage"></span>
+        </div>
+
+        <form id="registerForm" class="space-y-4">
+            <!-- 1. Họ và Tên -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Họ và Tên</label>
+                <input type="text" id="fullName" required max="100"
+                       class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Ví dụ: Nguyen Van A">
+            </div>
+
+            <!-- 2. Email (Bắt buộc theo DTO) -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Địa chỉ Email</label>
+                <input type="email" id="email" required max="100"
+                       class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="username@eiu.edu.vn">
+            </div>
+
+            <!-- 3. Số điện thoại (Tùy chọn nhưng nên có) -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Số điện thoại</label>
+                <input type="tel" id="phoneNumber" max="20"
+                       class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Ví dụ: 0912345678">
+            </div>
+
+            <!-- 4. Tên đăng nhập (Username) -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Tên đăng nhập (Username)</label>
+                <input type="text" id="username" required max="50"
+                       class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Chỉ viết liền, không dấu">
+            </div>
+
+            <!-- 5. Mật khẩu (Yêu cầu >= 6 ký tự từ DTO) -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu</label>
+                <input type="password" id="password" required minlength="6" max="100"
+                       class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Tối thiểu 6 ký tự">
+            </div>
+
+            <button type="submit" id="btnRegister"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg transition-all active:scale-[0.98]">
+                Đăng Ký Ngay
+            </button>
+        </form>
+
+        <!-- Nút quay lại đăng nhập -->
+        <div class="mt-6 pt-4 border-t border-slate-100 text-center text-sm text-slate-600">
+            Đã kích hoạt tài khoản trước đó?
+            <a href="/login.html" class="block mt-2 w-full text-center bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium py-2 rounded-xl transition-all">
+                Quay Lại Đăng Nhập
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Bốc dữ liệu từ các ô input
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            const alertBox = document.getElementById('statusAlert');
+            const alertMsg = document.getElementById('statusMessage');
+            const btn = document.getElementById('btnRegister');
+
+            btn.disabled = true;
+            btn.innerText = 'Đang xử lý đăng ký...';
+            alertBox.className = "hidden mb-4 p-3 text-sm rounded-lg flex items-center gap-2 border";
+
+            try {
+                // Thực hiện bắn dữ liệu lên API
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password,
+                        fullName: fullName,
+                        phoneNumber: phoneNumber
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Đăng ký thành công
+                    alertBox.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
+                    alertMsg.innerText = "Đăng ký thành công! Đang chuyển hướng về trang Đăng nhập...";
+                    alertBox.classList.remove('hidden');
+
+                    // Đợi 2 giây cho người dùng kịp nhìn thông báo rồi đá về trang Login
+                    setTimeout(() => { window.location.href = '/login.html'; }, 2000);
+                } else {
+                    // Thất bại do lỗi Logic từ Backend (Ví dụ: Trùng username, trùng email...)
+                    alertBox.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
+                    alertMsg.innerText = data.message || "Đăng ký thất bại. Vui lòng kiểm tra lại.";
+                    alertBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerText = 'Đăng Ký Ngay';
+                }
+            } catch (error) {
+                // Thất bại do sập mạng hoặc không thấy server
+                alertBox.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
+                alertMsg.innerText = "Không thể kết nối đến hệ thống máy chủ ngân hàng.";
+                alertBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = 'Đăng Ký Ngay';
+            }
+        });
+    </script>
+</body>
+</html>

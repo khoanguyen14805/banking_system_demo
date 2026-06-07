@@ -11,16 +11,15 @@ namespace Banking_System.Models
         [Required]
         public Guid UserId { get; set; }
 
-        [Required]
+
         [StringLength(255)]
-        public string Address { get; set; } = string.Empty;
+        public string? Address { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string CitizenId { get; set; } = string.Empty;
+        public string? CitizenId { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
