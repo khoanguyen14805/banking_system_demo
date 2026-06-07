@@ -75,9 +75,31 @@ namespace Banking_System.Controllers
                 isNewProfile = true;
             }
 
-            profile.Address = request.Address;
-            profile.DateOfBirth = request.DateOfBirth;
-            profile.CitizenId = request.CitizenId;
+            if (!string.IsNullOrWhiteSpace(request.Address))
+            {
+                profile.Address = request.Address;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.CitizenId))
+            {
+                profile.CitizenId = request.CitizenId;
+            }
+            else if (isNewProfile)
+            {
+                // Nếu là profile mới tinh và Frontend không gửi CCCD, ép nó thành null thay vì chuỗi rỗng
+                profile.CitizenId = null;
+                profile.Address = null;
+            }
+
+            // Check ngày sinh hợp lệ
+            if (request.DateOfBirth.HasValue && request.DateOfBirth.Value != default(DateTime) && request.DateOfBirth.Value.Year > 1753)
+            {
+                profile.DateOfBirth = request.DateOfBirth.Value;
+            }
+            else if (isNewProfile)
+            {
+                profile.DateOfBirth = null;
+            }
 
             // Handle UPLOAD FILE IMG
             if (request.AvatarFile != null && request.AvatarFile.Length > 0)
@@ -109,14 +131,20 @@ namespace Banking_System.Controllers
                 }
 
                 // Save relative path to database
-                profile.AvatarUrl = $"uploads/avatars/{uniqueFileName}";
+                profile.AvatarUrl = $"/uploads/avatars/{uniqueFileName}";
             }
 
             if (isNewProfile) _context.CustomerProfiles.Add(profile);
-            else _context.CustomerProfiles.Update(profile);
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Update profile successfully!" });
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Update profile successfully!", avatarUrl = profile.AvatarUrl });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Lỗi SaveChanges Profile]: {ex.InnerException?.Message ?? ex.Message}");
+                return StatusCode(500, new { message = "Lỗi hệ thống khi lưu thông tin vào cơ sở dữ liệu." });
+            }
         }
 
         //============= 3. PUT /api/users/change-password

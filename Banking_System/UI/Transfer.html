@@ -1,0 +1,458 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIU Digital Banking - Giao Dịch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <nav class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-xl tracking-tight">EIU BANKING</span>
+                <span class="text-xs bg-blue-700 px-2 py-1 rounded">Hệ thống giao dịch số</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="/profile.html" class="flex items-center gap-3 hover:bg-blue-700 p-1.5 px-3 rounded-xl transition-all group">
+                    <div class="text-right hidden sm:block">
+                        <p id="navUserFullName" class="text-sm font-bold leading-tight">Đang tải...</p>
+                        <p class="text-[11px] text-blue-200 group-hover:text-white transition-all">Xem hồ sơ ⚙️</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full border-2 border-white/80 overflow-hidden bg-blue-800 flex-shrink-0 shadow-sm">
+                        <img id="navUserAvatar" src="https://placehold.co/100" alt="Avatar" class="w-full h-full object-cover">
+                    </div>
+                </a>
+
+                <button id="btnLogout" class="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all shadow-sm active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-currentColor="white" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="noAccountSection" class="hidden max-w-xl mx-auto mt-16 px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 text-3xl mb-4">
+                🏦
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">Kích Hoạt Tài Khoản Ngân Hàng</h2>
+            <p class="text-slate-500 mt-2 text-sm leading-relaxed">
+                Chào mừng bạn đến với hệ thống ngân hàng số EIU. Hiện tại bạn chưa kích hoạt tài khoản thanh toán nội bộ để thực hiện giao dịch. Hãy mở tài khoản ngay bây giờ!
+            </p>
+
+            <form id="createAccountForm" class="mt-6 text-left space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Chọn loại tài khoản</label>
+                    <select id="accountType" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="0">Tài khoản thanh toán cá nhân (Checking)</option>
+                        <option value="1">Tài khoản tiết kiệm (Saving)</option>
+                    </select>
+                </div>
+
+                <div id="createAccountAlert" class="hidden p-3 text-xs bg-red-50 border border-red-200 text-red-600 rounded-lg"></div>
+
+                <button type="submit" id="btnCreateAccount" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-[0.98]">
+                    Khởi Tạo Tài Khoản Ngay
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <main id="mainDashboardSection" class="hidden max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <div class="md:col-span-1 space-y-6">
+            <div class="bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                <p class="text-xs text-blue-200 uppercase tracking-wider font-semibold">Tài khoản thanh toán</p>
+                <h3 id="myAccountNumber" class="text-2xl font-bold mt-1 tracking-wide">------</h3>
+                <div class="mt-8">
+                    <p class="text-xs text-blue-200 uppercase tracking-wider font-semibold">Số dư khả dụng</p>
+                    <h2 id="myBalance" class="text-3xl font-extrabold mt-1">0 VND</h2>
+                </div>
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+            </div>
+
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-1">
+                <button onclick="switchTab('transfer')" id="tabBtn-transfer" class="w-full text-left px-4 py-2.5 rounded-lg font-semibold text-blue-600 bg-blue-50 transition-all">
+                    1. Chuyển Khoản Nội Bộ
+                </button>
+                <button onclick="switchTab('deposit')" id="tabBtn-deposit" class="w-full text-left px-4 py-2.5 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    2. Nạp Tiền (Deposit)
+                </button>
+                <button onclick="switchTab('withdraw')" id="tabBtn-withdraw" class="w-full text-left px-4 py-2.5 rounded-lg font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    3. Rút Tiền (Withdraw)
+                </button>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between min-h-[420px]">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center gap-2">
+                        🕒 Lịch sử giao dịch
+                    </h3>
+                    <div id="transactionHistoryList" class="space-y-3 text-sm text-slate-500">
+                        Đang tải lịch sử giao dịch...
+                    </div>
+                </div>
+
+                <div id="paginationControls" class="hidden mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                    <button id="btnPrevPage" onclick="changePage(-1)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        ⬅️ Trước
+                    </button>
+                    <span id="pageInfo" class="font-medium">Trang 1 / 1</span>
+                    <button id="btnNextPage" onclick="changePage(1)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        Sau ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+
+                <div id="statusAlert" class="hidden mb-6 p-4 rounded-xl text-sm flex items-center gap-2 border">
+                    <span id="statusMessage"></span>
+                </div>
+
+                <div id="section-transfer" class="tab-content">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">Chuyển Khoản Siêu Tốc</h2>
+                    <form id="transferForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Số tài khoản người nhận</label>
+                            <input type="text" id="toAccountNumber" required class="w-full px-4 py-2 border border-slate-300 rounded-xl" placeholder="Ví dụ: 222222">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Số tiền (VND)</label>
+                            <input type="number" id="transferAmount" required min="1000" class="w-full px-4 py-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nội dung</label>
+                            <textarea id="transferDescription" rows="2" class="w-full px-4 py-2 border border-slate-300 rounded-xl" placeholder="Nội dung chuyển khoản..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition-all">Xác Nhận Chuyển Tiền</button>
+                    </form>
+                </div>
+
+                <div id="section-deposit" class="tab-content hidden">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">Nạp Tiền Vào Tài Khoản</h2>
+                    <form id="depositForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Số tiền muốn nạp (VND)</label>
+                            <input type="number" id="depositAmount" required min="1000" class="w-full px-4 py-2 border border-slate-300 rounded-xl" placeholder="Nhập số tiền...">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition-all">Xác Nhận Nạp Tiền</button>
+                    </form>
+                </div>
+
+                <div id="section-withdraw" class="tab-content hidden">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">Rút Tiền Khỏi Tài Khoản</h2>
+                    <form id="withdrawForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Số tiền muốn rút (VND)</label>
+                            <input type="number" id="withdrawAmount" required min="1000" class="w-full px-4 py-2 border border-slate-300 rounded-xl" placeholder="Nhập số tiền...">
+                        </div>
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-xl transition-all">Xác Nhận Rút Tiền</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = sessionStorage.getItem('token');
+        const loggedInUser = sessionStorage.getItem('username');
+        if (!token) window.location.href = '/login.html';
+
+        // ✅ SỬA LỖI TẠI ĐÂY: Chỉ gán nếu thẻ welcomeUser còn tồn tại trên giao diện
+        const welcomeEl = document.getElementById('welcomeUser');
+        if (welcomeEl) {
+            welcomeEl.innerText = `Xin chào, ${loggedInUser}`;
+        }
+
+        // 1. HÀM MỚI: Tách riêng tải thông tin Navbar (Lỗi không lo sập trang)
+        async function fetchNavbarProfile() {
+            try {
+                const profileResponse = await fetch('/api/users/profile', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (profileResponse.ok) {
+                    const profileData = await profileResponse.json();
+                    document.getElementById('navUserFullName').innerText = profileData.fullName || profileData.username || loggedInUser || "Khách hàng";
+                    if (profileData.profile && profileData.profile.avatarUrl) {
+                       document.getElementById('navUserAvatar').src = profileData.profile.avatarUrl + "?t=" + new Date().getTime();
+                    }
+                } else {
+                    document.getElementById('navUserFullName').innerText = loggedInUser || "Thành viên EIU";
+                }
+            } catch (profileError) {
+                console.error("Lỗi lấy Profile Navbar:", profileError);
+                document.getElementById('navUserFullName').innerText = loggedInUser || "Thành viên EIU";
+            }
+        }
+
+        // 2. HÀM CŨ CỦA NÝ: Giữ nguyên logic lấy tài khoản ngân hàng
+        async function fetchAccountDetails() {
+            try {
+                const response = await fetch('/api/accounts', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    if (result.data && result.data.length > 0) {
+                        const account = result.data[0];
+
+                        document.getElementById('myAccountNumber').innerText = account.accountNumber || account.AccountNumber || "------";
+                        document.getElementById('myBalance').innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(account.balance !== undefined ? account.balance : account.Balance);
+
+                        document.getElementById('mainDashboardSection').classList.remove('hidden');
+                        document.getElementById('noAccountSection').classList.add('hidden');
+
+                        // Tải lịch sử giao dịch phân trang
+                        await fetchTransactionHistory(1);
+
+                    } else {
+                        document.getElementById('noAccountSection').classList.remove('hidden');
+                        document.getElementById('mainDashboardSection').classList.add('hidden');
+                    }
+                }
+            } catch (accountError) {
+                console.error("Lỗi nghiêm trọng hệ thống tài khoản:", accountError);
+            }
+        }
+
+        // Khai báo 2 biến toàn cục để quản lý trạng thái trang hiện tại
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Hàm lấy lịch sử giao dịch với phân trang (GIỮ NGUYÊN)
+        async function fetchTransactionHistory(page = 1) {
+            currentPage = page;
+            const historyListContainer = document.getElementById('transactionHistoryList');
+            const myAccNum = document.getElementById('myAccountNumber').innerText;
+
+            try {
+                const response = await fetch(`/api/transactions?pageNumber=${currentPage}&pageSize=5`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const list = result.data || [];
+                    totalPages = result.totalPages || 1;
+
+                    if (list.length === 0) {
+                        historyListContainer.innerHTML = `<p class="text-center text-slate-400 py-4">Chưa có giao dịch nào.</p>`;
+                        document.getElementById('paginationControls').classList.add('hidden');
+                        return;
+                    }
+
+                    historyListContainer.innerHTML = list.map(item => {
+                        const date = new Date(item.createdAt).toLocaleString('vi-VN');
+                        const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.amount);
+                        const isIncome = (item.destinationAccountNumber === myAccNum) || (item.type === "Deposit");
+
+                        const colorClass = isIncome ? "text-emerald-600 font-bold" : "text-red-600 font-bold";
+                        const prefix = isIncome ? "+" : "-";
+
+                        let badgeColor = "bg-slate-100 text-slate-700";
+                        if (item.type === "Deposit") badgeColor = "bg-emerald-50 text-emerald-700";
+                        if (item.type === "Withdraw") badgeColor = "bg-amber-50 text-amber-700";
+                        if (item.type === "Transfer") badgeColor = isIncome ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700";
+
+                        return `
+                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center transition-all hover:bg-slate-100/70">
+                            <div class="space-y-0.5 min-w-0 flex-1 pr-2">
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${badgeColor}">
+                                    ${item.type}
+                                </span>
+                                <p class="text-slate-700 font-medium text-xs mt-0.5 truncate" title="${item.description}">
+                                    ${item.description}
+                                </p>
+                                <span class="text-[9px] text-slate-400 block">${date}</span>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="${colorClass} text-xs font-bold">${prefix}${formattedAmount}</span>
+                            </div>
+                        </div>
+                    `;
+                    }).join('');
+
+                    document.getElementById('paginationControls').classList.remove('hidden');
+                    document.getElementById('pageInfo').innerText = `Trang ${currentPage} / ${totalPages}`;
+                    document.getElementById('btnPrevPage').disabled = (currentPage === 1);
+                    document.getElementById('btnNextPage').disabled = (currentPage === totalPages);
+
+                } else {
+                    historyListContainer.innerHTML = `<p class="text-center text-red-400 py-4">Không thể tải dữ liệu.</p>`;
+                }
+            } catch (error) {
+                console.error("Lỗi dòng tiền:", error);
+            }
+        }
+
+        // Hàm xử lý khi người dùng ấn nút Chuyển Trang (GIỮ NGUYÊN)
+        function changePage(direction) {
+            const targetPage = currentPage + direction;
+            if (targetPage >= 1 && targetPage <= totalPages) {
+                fetchTransactionHistory(targetPage);
+            }
+        }
+
+        // ✅ KÍCH HOẠT CHẠY SONG SONG KHI TẢI TRANG
+        fetchNavbarProfile();
+        fetchAccountDetails();
+
+        // LOGIC XỬ LÝ GỬI FORM TẠO BANK ACCOUNT MỚI (GIỮ NGUYÊN)
+        document.getElementById('createAccountForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const accTypeInputValue = document.getElementById('accountType').value;
+            const accType = parseInt(accTypeInputValue, 10);
+            const alertBox = document.getElementById('createAccountAlert');
+            const btn = document.getElementById('btnCreateAccount');
+
+            btn.disabled = true;
+            btn.innerText = 'Đang khởi tạo số tài khoản ngẫu nhiên...';
+            alertBox.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ accountType: accType })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    await fetchAccountDetails();
+                } else {
+                    alertBox.innerText = data.message || "Tạo tài khoản thất bại.";
+                    alertBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerText = 'Khởi Tạo Tài Khoản Ngay';
+                }
+            } catch (error) {
+                alertBox.innerText = "Lỗi kết nối máy chủ.";
+                alertBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = 'Khởi Tạo Tài Khoản Ngay';
+            }
+        });
+
+        // Hàm chuyển đổi Tab (GIỮ NGUYÊN)
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            document.querySelectorAll('[id^="tabBtn-"]').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-600');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-50');
+            });
+            document.getElementById(`tabBtn-${tabName}`).classList.add('bg-blue-50', 'text-blue-600');
+            document.getElementById('statusAlert').className = "hidden mb-6 p-4 rounded-xl text-sm flex items-center gap-2 border";
+        }
+
+        function showAlert(message, isSuccess) {
+            const alertBox = document.getElementById('statusAlert');
+            const alertMsg = document.getElementById('statusMessage');
+            alertBox.className = "mb-6 p-4 rounded-xl text-sm flex items-center gap-2 border " +
+                (isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700");
+            alertMsg.innerText = message;
+        }
+
+        // Form chuyển tiền (GIỮ NGUYÊN)
+        document.getElementById('transferForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const response = await fetch('/api/transactions/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    toAccountNumber: document.getElementById('toAccountNumber').value.trim(),
+                    amount: parseFloat(document.getElementById('transferAmount').value),
+                    description: document.getElementById('transferDescription').value
+                })
+            });
+            const data = await response.json();
+            showAlert(data.message, response.ok);
+            if (response.ok) { document.getElementById('transferForm').reset(); fetchAccountDetails(); }
+        });
+
+        // Nạp tiền (GIỮ NGUYÊN)
+        document.getElementById('depositForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const myAccNum = document.getElementById('myAccountNumber').innerText;
+            const amt = parseFloat(document.getElementById('depositAmount').value);
+
+            try {
+                const response = await fetch('/api/transactions/deposit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ AccountNumber: myAccNum, Amount: amt })
+                });
+
+                const data = await response.json();
+                showAlert(data.message || "Nạp tiền thành công!", response.ok);
+
+                if (response.ok) {
+                    document.getElementById('depositForm').reset();
+                    await fetchAccountDetails();
+                }
+            } catch (error) {
+                showAlert("Lỗi kết nối máy chủ nạp tiền.", false);
+            }
+        });
+
+        // Rút tiền (GIỮ NGUYÊN)
+        document.getElementById('withdrawForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const myAccNum = document.getElementById('myAccountNumber').innerText;
+            const amt = parseFloat(document.getElementById('withdrawAmount').value);
+
+            try {
+                const response = await fetch('/api/transactions/withdraw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ AccountNumber: myAccNum, Amount: amt })
+                });
+
+                const data = await response.json();
+                showAlert(data.message || "Rút tiền thành công!", response.ok);
+
+                if (response.ok) {
+                    document.getElementById('withdrawForm').reset();
+                    await fetchAccountDetails();
+                }
+            } catch (error) {
+                showAlert("Lỗi kết nối máy chủ rút tiền.", false);
+            }
+        });
+
+        // Đăng xuất (GIỮ NGUYÊN)
+        document.getElementById('btnLogout').addEventListener('click', function () {
+            if (confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống EIU Banking?")) {
+                // 1. Xóa sạch token phiên làm việc
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                localStorage.removeItem('username'); // Nếu ný có lưu username thì xóa luôn
+
+                // 2. Đá user về trang login ngay lập tức
+                // Chỉnh lại link 'login.html' nếu file login của ný nằm ở thư mục khác nhé
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
